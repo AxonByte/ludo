@@ -2,6 +2,7 @@ const User = require("../models/users");
 const Otp = require("../models/otp");
 const Kyc = require("../models/kyc");
 const { generateAccessToken, generateRefreshToken } = require("../services/tokenService");
+const { verifyRefreshToken } = require("../middleware/auth");
 
 // Generate random OTP
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -156,4 +157,41 @@ const getKycStatus = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, verifyUserOtp,getKycStatus,uploadKyc,updateProfile };
+const refreshAccessToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  
+
+  if (!refreshToken) {
+    return res.status(403).send({ message: "Refresh token not provided" });
+  }
+
+  try {
+    // Verify the refresh token
+    const decoded =verifyRefreshToken(refreshToken);
+console.log(decoded);
+    // Check if token matches the one in the database
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      return res.status(403).send({ message: "Invalid refresh token" });
+    }
+    const payload={
+      userType:user.userType,
+      _id:user._id
+     }
+    // Generate new access token
+    const accessToken = generateAccessToken(payload);
+
+    res.send({
+      accessToken,
+      message: "Access token refreshed successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(403).send({ message: "Invalid or expired refresh token", error });
+  }
+};
+
+
+
+
+module.exports = { registerUser, loginUser, verifyUserOtp,getKycStatus,uploadKyc,updateProfile, refreshAccessToken };

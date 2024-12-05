@@ -43,7 +43,9 @@ exports.auth = (req, res, next) => {
   }
 };
 exports.verifyRefreshToken = (token) => jwt.verify(token,REFRESH_SECRET_KEY,(err, decodedData)=>{
+  
   if(decodedData){
+   
     return decodedData
   }
 })

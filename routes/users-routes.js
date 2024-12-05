@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerUser, loginUser, verifyUserOtp, updateProfile, uploadKyc, getKycStatus } = require("../controllers/users-controllers");
+const { registerUser, loginUser, verifyUserOtp, updateProfile, uploadKyc, getKycStatus, refreshAccessToken } = require("../controllers/users-controllers");
 const upload = require("../utils/fileUploader");
 
 const router = express.Router();
@@ -20,5 +20,5 @@ router.post("/profile/:userId/kyc", upload.single("documentFile"), uploadKyc);
 
 // Get KYC status
 router.get("/profile/:userId/kyc", getKycStatus);
-
+router.post("/refresh-token", refreshAccessToken);
 module.exports = router;
